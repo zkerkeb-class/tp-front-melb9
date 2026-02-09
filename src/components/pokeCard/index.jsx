@@ -1,44 +1,77 @@
-import { useEffect, useState } from "react";
 import { Link } from "react-router";
-import usePokemon from "../../hook/usePokemon";
-
+import { useState, useEffect } from "react";
 import './index.css';
 import PokeTitle from "./pokeTitle";
 import PokeImage from "./pokeImage";
 
 const PokeCard = ({ pokemon }) => {
-    const {pokemonData, loading} = usePokemon(pokemon.url);
-    console.log('pokeData',pokemonData)
+    const [isFavorite, setIsFavorite] = useState(false);
+    useEffect(() => {
+        const favorites = JSON.parse(localStorage.getItem("pokeFavorites")) || [];
+        setIsFavorite(favorites.includes(pokemon.id));
+    }, [pokemon.id]);
 
+    const toggleFavorite = (e) => {
+        e.preventDefault();
+        let favorites = JSON.parse(localStorage.getItem("pokeFavorites")) || [];
+        
+        if (favorites.includes(pokemon.id)) {
+            favorites = favorites.filter(id => id !== pokemon.id);
+            setIsFavorite(false);
+        } else {
+            favorites.push(pokemon.id);
+            setIsFavorite(true);
+        }
+        localStorage.setItem("pokeFavorites", JSON.stringify(favorites));
+        window.dispatchEvent(new Event("storage"));
+    };
 
-    if (loading) {
-        return <p>Chargement du Pokémon...</p>;
-    }
-
+    const mainType = pokemon.type && pokemon.type[0] ? pokemon.type[0].toLowerCase() : 'normal';
 
     return (
-        <Link to={`/pokemonDetails/${encodeURIComponent(pokemon.url)}`}>
-        <div className="poke-card">
-            <div className={`poke-card-header poke-type-${pokemonData.types?.[0]?.type?.name}`}>
-                <PokeTitle name={pokemon.name} />
-            </div>
-            <div className="poke-image-background">
-                <PokeImage imageUrl={pokemonData.sprites?.other?.['official-artwork']?.front_default} />
-            </div>
-            <div>
+        <Link to={`/pokemonDetails/${pokemon.id}`} style={{ textDecoration: 'none', color: 'inherit', position: 'relative', display: 'block' }}>
+            <div className="poke-card">
+                
+                {/*bouton favoris*/}
+                <button 
+                    onClick={toggleFavorite}
+                    style={{
+                        position: "absolute",
+                        top: "10px",
+                        right: "10px",
+                        background: "rgba(255, 255, 255, 0.8)",
+                        border: "none",
+                        borderRadius: "50%",
+                        width: "35px",
+                        height: "35px",
+                        cursor: "pointer",
+                        zIndex: 10,
+                        fontSize: "20px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center"
+                    }}
+                >
+                    {isFavorite ? "⭐" : "☆"}
+                </button>
 
-                {pokemonData.stats?.map((stat) => {
-                    return(
-                        <div className="poke-stat-row" key={stat.stat.name}>
-                            <span className={`poke-type-font poke-type-${stat.stat.name}`}>{stat.stat.name}</span>
-
-                            <span className="poke-type-font poke-stat-value">{stat.base_stat}</span>
+                <div className={`poke-card-header poke-type-${mainType}`}>
+                    <PokeTitle name={pokemon.name.french} />
+                </div>
+                
+                <div className="poke-image-background">
+                    <PokeImage imageUrl={pokemon.image} />
+                </div>
+                
+                <div className="stats-container">
+                    {pokemon.base && Object.entries(pokemon.base).map(([key, value]) => (
+                        <div className="poke-stat-row" key={key}>
+                            <span className="poke-type-font">{key}</span>
+                            <span className="poke-type-font poke-stat-value">{value}</span>
                         </div>
-                    ) 
-                })}    
-
+                    ))}
+                </div>
             </div>
-        </div>
         </Link>
     );
 }
