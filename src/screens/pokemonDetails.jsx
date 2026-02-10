@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate, Link } from "react-router";
+import { useParams, Link, useNavigate } from "react-router";
+import './pokemonDetails.css';
 
 const PokemonDetails = () => {
     const { id } = useParams();
-    const navigate = useNavigate();
+    const navigate = useNavigate(); // Nécessaire pour la redirection
     const [pokemon, setPokemon] = useState(null);
     const [isFavorite, setIsFavorite] = useState(false);
 
@@ -14,8 +15,7 @@ const PokemonDetails = () => {
                 setPokemon(data);
                 const favorites = JSON.parse(localStorage.getItem("pokeFavorites")) || [];
                 setIsFavorite(favorites.includes(data.id));
-            })
-            .catch(err => console.error("Erreur:", err));
+            });
     }, [id]);
 
     const toggleFavorite = () => {
@@ -28,76 +28,78 @@ const PokemonDetails = () => {
             setIsFavorite(true);
         }
         localStorage.setItem("pokeFavorites", JSON.stringify(favorites));
-        // Force la mise à jour visuelle immédiate
         window.dispatchEvent(new Event("storage"));
+        setIsFavorite(!isFavorite); // Mise à jour locale pour l'affichage immédiat
     };
 
+    // Fonction de suppression
     const handleDelete = async () => {
         if (window.confirm(`⚠️ Es-tu sûr de vouloir supprimer ${pokemon.name.french} ?`)) {
             try {
                 const res = await fetch(`http://localhost:3000/pokemons/${id}`, { method: 'DELETE' });
                 if (res.ok) {
-                    alert("Pokémon supprimé !");
-                    navigate('/');
+                    navigate('/'); // Retour à l'accueil après suppression
                 }
             } catch (error) {
-                alert("Erreur serveur");
+                alert("Erreur lors de la suppression");
             }
         }
     };
 
-    if (!pokemon) return <p style={{textAlign:"center", marginTop:"50px"}}>Chargement...</p>;
+    if (!pokemon) return <p style={{color: 'white', textAlign: 'center', marginTop: '50px'}}>Chargement...</p>;
+
+    const mainType = pokemon.type[0].toLowerCase();
 
     return (
-        <div style={{ padding: "20px", maxWidth: "600px", margin: "0 auto", fontFamily: "Arial", textAlign: "center" }}>
-            <div style={{ textAlign: "left", marginBottom: "20px" }}>
-                <Link to="/" style={{ textDecoration: "none", color: "#2196F3", fontWeight: "bold" }}>← Retour à la liste</Link>
-            </div>
+        <div className="details-page-container">
+            <Link to="/" className="back-link">← Retour au Pokédex</Link>
 
-            <div style={{ border: "1px solid #ddd", borderRadius: "15px", padding: "20px", boxShadow: "0 4px 8px rgba(0,0,0,0.1)", backgroundColor: "#fff", position: "relative" }}>
+            {/* On utilise une classe CSS pour gérer la couleur dynamique via une variable */}
+            <div className={`details-card poke-type-${mainType}-border`}>
                 
-                {/* BOUTON ÉTOILE DÉTAILS */}
-                <button 
-                    onClick={toggleFavorite}
-                    style={{
-                        position: "absolute", top: "20px", right: "20px",
-                        background: "none", border: "none", fontSize: "30px",
-                        cursor: "pointer", zIndex: 2
-                    }}
-                >
+                <button onClick={toggleFavorite} className="details-fav-button">
                     {isFavorite ? "⭐" : "☆"}
                 </button>
 
-                <img 
-                    src={pokemon.image || "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/132.png"} 
-                    alt={pokemon.name.french} 
-                    style={{ width: "250px", height: "250px", objectFit: "contain" }} 
-                />
-                
-                <h1 style={{ fontSize: "2.5rem", margin: "10px 0" }}>{pokemon.name.french}</h1>
-                
-                <div style={{ display: "flex", justifyContent: "center", gap: "10px", marginBottom: "20px" }}>
-                    {pokemon.type.map((t, index) => (
-                        <span key={index} style={{ padding: "5px 15px", borderRadius: "20px", backgroundColor: "#eee", fontSize: "14px", fontWeight: "bold" }}>
+                <div className="details-image-container">
+                    <img src={pokemon.image} alt={pokemon.name.french} className="details-image" />
+                </div>
+
+                <h1 className="details-title">{pokemon.name.french}</h1>
+
+                <div className="details-types">
+                    {pokemon.type.map(t => (
+                        <span key={t} className={`type-badge poke-type-${t.toLowerCase()}`}>
                             {t}
                         </span>
                     ))}
                 </div>
 
-                <div style={{ backgroundColor: "#f9f9f9", padding: "15px", borderRadius: "10px", textAlign: "left" }}>
-                    <h3 style={{ marginTop: 0, borderBottom: "1px solid #ddd", paddingBottom: "5px" }}>Statistiques</h3>
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
-                        <p><strong>HP:</strong> {pokemon.base.HP}</p>
-                        <p><strong>Attaque:</strong> {pokemon.base.Attack}</p>
-                        <p><strong>Défense:</strong> {pokemon.base.Defense}</p>
-                        <p><strong>Vitesse:</strong> {pokemon.base.Speed}</p>
-                    </div>
+                <div className="details-stats">
+                    {Object.entries(pokemon.base).map(([key, value]) => (
+                        <div className="stat-row" key={key}>
+                            <span className="stat-name">{key}</span>
+                            <span className="stat-value">{value}</span>
+                        </div>
+                    ))}
                 </div>
 
-                <div style={{ marginTop: "30px", display: "flex", justifyContent: "center", gap: "15px" }}>
-                    <button onClick={() => navigate(`/pokemonEdit/${id}`)} style={{ padding: "10px 20px", backgroundColor: "#FFA500", color: "white", border: "none", borderRadius: "5px", cursor: "pointer" }}>Modifier</button>
-                    <button onClick={handleDelete} style={{ padding: "10px 20px", backgroundColor: "#f44336", color: "white", border: "none", borderRadius: "5px", cursor: "pointer" }}>Supprimer</button>
+                {/* --- BOUTONS D'ACTION (Modifier / Supprimer) --- */}
+                <div className="action-buttons-container">
+                    <button 
+                        onClick={() => navigate(`/pokemonEdit/${id}`)} 
+                        className="btn-action btn-edit"
+                    >
+                        Modifier
+                    </button>
+                    <button 
+                        onClick={handleDelete} 
+                        className="btn-action btn-delete"
+                    >
+                        Supprimer
+                    </button>
                 </div>
+
             </div>
         </div>
     );

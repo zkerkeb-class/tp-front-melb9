@@ -1,4 +1,4 @@
-import { Link } from "react-router";
+import { Link } from "react-router"; 
 import { useState, useEffect } from "react";
 import './index.css';
 import PokeTitle from "./pokeTitle";
@@ -6,6 +6,7 @@ import PokeImage from "./pokeImage";
 
 const PokeCard = ({ pokemon }) => {
     const [isFavorite, setIsFavorite] = useState(false);
+    
     useEffect(() => {
         const favorites = JSON.parse(localStorage.getItem("pokeFavorites")) || [];
         setIsFavorite(favorites.includes(pokemon.id));
@@ -32,27 +33,11 @@ const PokeCard = ({ pokemon }) => {
         <Link to={`/pokemonDetails/${pokemon.id}`} style={{ textDecoration: 'none', color: 'inherit', position: 'relative', display: 'block' }}>
             <div className="poke-card">
                 
-                {/*bouton favoris*/}
                 <button 
                     onClick={toggleFavorite}
-                    style={{
-                        position: "absolute",
-                        top: "10px",
-                        right: "10px",
-                        background: "rgba(255, 255, 255, 0.8)",
-                        border: "none",
-                        borderRadius: "50%",
-                        width: "35px",
-                        height: "35px",
-                        cursor: "pointer",
-                        zIndex: 10,
-                        fontSize: "20px",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center"
-                    }}
+                    className={`fav-button ${isFavorite ? 'active' : ''}`}
                 >
-                    {isFavorite ? "⭐" : "☆"}
+                    {isFavorite ? "★" : "☆"}
                 </button>
 
                 <div className={`poke-card-header poke-type-${mainType}`}>

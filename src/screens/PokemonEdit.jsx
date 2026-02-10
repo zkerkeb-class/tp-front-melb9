@@ -1,95 +1,151 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router";
+import { useParams, useNavigate, Link } from "react-router";
+import './pokemonEdit.css';
 
 const PokemonEdit = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     
-    // On prépare le formulaire vide
-    const [formData, setFormData] = useState({
+    const [pokemon, setPokemon] = useState({
         name: { french: "" },
+        image: "",
         type: [],
-        base: { HP: 0, Attack: 0, Defense: 0, Speed: 0 }
+        base: { HP: 0, Attack: 0, Defense: 0, Speed: 0, SpecialAttack: 0, SpecialDefense: 0 }
     });
 
-    // 1. On récupère les infos actuelles du Pokémon
+    const allTypes = [
+        "Normal", "Fire", "Water", "Grass", "Electric", "Ice", "Fighting", 
+        "Poison", "Ground", "Flying", "Psychic", "Bug", "Rock", "Ghost", 
+        "Dragon", "Steel", "Fairy"
+    ];
+
     useEffect(() => {
-        fetch(`http://localhost:3000/pokemons/${id}`)
-            .then(res => res.json())
-            .then(data => {
-                setFormData(data); 
-            });
+        if (id) {
+            fetch(`http://localhost:3000/pokemons/${id}`)
+                .then(res => res.json())
+                .then(data => setPokemon(data))
+                .catch(err => console.error(err));
+        }
     }, [id]);
 
-    // 2. Quand on tape dans les champs
     const handleChange = (e) => {
         const { name, value } = e.target;
-        
-        // Si on change le nom
-        if (name === "frenchName") {
-            setFormData({ ...formData, name: { ...formData.name, french: value } });
+
+        if (['HP', 'Attack', 'Defense', 'Speed', 'SpecialAttack', 'SpecialDefense'].includes(name)) {
+            setPokemon(prev => ({
+                ...prev,
+                base: { ...prev.base, [name]: parseInt(value) || 0 }
+            }));
+        } 
+        else if (name === 'name') {
+            setPokemon(prev => ({
+                ...prev,
+                name: { ...prev.name, french: value }
+            }));
         }
-        // Si on change une stat
+        else if (name === 'type') {
+            setPokemon(prev => ({ ...prev, type: [value] }));
+        }
         else {
-            setFormData({ ...formData, base: { ...formData.base, [name]: parseInt(value) } });
+            setPokemon(prev => ({ ...prev, [name]: value }));
         }
     };
 
-    // 3. Quand on clique sur "Enregistrer"
     const handleSubmit = async (e) => {
         e.preventDefault();
-        
-        const response = await fetch(`http://localhost:3000/pokemons/${id}`, {
-            method: 'PUT', // C'est ici qu'on demande la Modification
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(formData)
-        });
-
-        if (response.ok) {
-            alert("Modification réussie !");
-            navigate(`/pokemonDetails/${id}`); // Retour aux détails
-        } else {
-            alert("Erreur lors de la modification");
+        try {
+            const response = await fetch(`http://localhost:3000/pokemons/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(pokemon)
+            });
+            if (response.ok) {
+                navigate(`/pokemonDetails/${id}`); // Retour aux détails après sauvegarde
+            }
+        } catch (error) {
+            console.error("Erreur update", error);
         }
     };
 
+    if (!pokemon.name.french) return <p style={{color:'white', textAlign:'center'}}>Chargement...</p>;
+
     return (
-        <div style={{ padding: "20px", maxWidth: "500px", margin: "0 auto", fontFamily: "Arial" }}>
-            <h1>Modifier le Pokémon</h1>
+        <div className="edit-page-container">
+             <Link to={`/pokemonDetails/${id}`} className="back-link">← Annuler</Link>
             
-            <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
-                
-                <label>
-                    <strong>Nom Français :</strong>
-                    <input 
-                        type="text" 
-                        name="frenchName" 
-                        value={formData.name?.french || ""} 
-                        onChange={handleChange}
-                        style={{ padding: "8px", width: "100%", marginTop: "5px" }}
-                    />
-                </label>
+            <div className="edit-card">
+                <h2 className="edit-title">Modifier {pokemon.name.french}</h2>
 
-                <h3>Statistiques</h3>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "15px" }}>
-                    {["HP", "Attack", "Defense", "Speed"].map((stat) => (
-                        <label key={stat}>
-                            {stat} :
+                <form onSubmit={handleSubmit} className="edit-form">
+                    
+                    {/* SECTION 1 : INFOS GÉNÉRALES */}
+                    <div className="form-section">
+                        <label>Nom du Pokémon</label>
+                        <input 
+                            type="text" 
+                            name="name" 
+                            value={pokemon.name.french} 
+                            onChange={handleChange} 
+                            className="input-field"
+                        />
+                    </div>
+
+                    <div className="form-row">
+                        <div className="form-section" style={{flex: 2}}>
+                            <label>URL de l'image</label>
                             <input 
-                                type="number" 
-                                name={stat} 
-                                value={formData.base?.[stat] || 0} 
-                                onChange={handleChange}
-                                style={{ padding: "5px", width: "100%" }}
+                                type="text" 
+                                name="image" 
+                                value={pokemon.image} 
+                                onChange={handleChange} 
+                                className="input-field"
+                                placeholder="https://..."
                             />
-                        </label>
-                    ))}
-                </div>
+                        </div>
+                        {/* Prévisualisation de l'image */}
+                        <div className="image-preview">
+                            {pokemon.image && <img src={pokemon.image} alt="Preview" />}
+                        </div>
+                    </div>
 
-                <button type="submit" style={{ marginTop: "20px", padding: "15px", backgroundColor: "#4CAF50", color: "white", border: "none", borderRadius: "5px", cursor: "pointer", fontSize: "16px" }}>
-                    💾 Enregistrer les modifications
-                </button>
-            </form>
+                    <div className="form-section">
+                        <label>Type Principal</label>
+                        <select 
+                            name="type" 
+                            value={pokemon.type[0] || ""} 
+                            onChange={handleChange} 
+                            className="input-field select-field"
+                        >
+                            <option value="" disabled>Choisir un type</option>
+                            {allTypes.map(t => (
+                                <option key={t} value={t}>{t}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    {/* SECTION 2 : STATISTIQUES */}
+                    <h3 className="section-subtitle">Statistiques de base</h3>
+                    
+                    <div className="stats-grid-edit">
+                        {Object.keys(pokemon.base).map((stat) => (
+                            <div key={stat} className="stat-input-group">
+                                <label>{stat}</label>
+                                <input 
+                                    type="number" 
+                                    name={stat} 
+                                    value={pokemon.base[stat]} 
+                                    onChange={handleChange} 
+                                    className="input-field stat-field"
+                                />
+                            </div>
+                        ))}
+                    </div>
+
+                    <button type="submit" className="save-button">
+                         Enregistrer les modifications
+                    </button>
+                </form>
+            </div>
         </div>
     );
 };
