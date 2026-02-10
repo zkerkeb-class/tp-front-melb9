@@ -10,20 +10,11 @@ function App() {
   useEffect(() => {
     console.log("App component mounted");
 
-    // setTimeout(() =>
-      // redirectToDetails()
-      // , 5000);
-
   }, []);
 
-  const redirectToDetails = () => {
-    navigate('/pokemonDetails');
-  }
 
   return (
     <div>
-
-      <Link to="/pokemonDetails">Voir les détails du Pokémon</Link>
       <Pokelist></Pokelist>
     </div>
   )

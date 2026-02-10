@@ -1,11 +1,87 @@
-.poke-list-container{
+.poke-list-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 20px;
     display: flex;
     flex-direction: column;
-
+    align-items: center;
 }
 
-.poke-list{
+h2 {
+    font-size: 3rem;
+    font-weight: 900;
+    margin-bottom: 40px;
+    color: white;
+    letter-spacing: -1px;
+}
+
+.toolbar-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 50px;
+    padding: 10px 25px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 50px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.search-form {
+    display: flex;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 30px;
+    padding: 2px 5px 2px 15px;
+}
+
+.search-input {
+    background: transparent;
+    border: none;
+    color: white;
+    outline: none;
+    height: 35px;
+    width: 180px;
+}
+
+.favorites-button {
+    background: rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 30px;
+    padding: 10px 20px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.favorites-button:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: black;
+}
+
+.favorites-button.active {
+    background: rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+    border-color: rgba(255, 255, 255, 0.5);
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
+}
+
+.new-button {
+    background: #2e7d32;
+    color: white;
+    text-decoration: none;
+    padding: 10px 20px;
+    border-radius: 30px;
+    font-weight: 600;
+}
+
+.poke-list {
     display: flex;
     flex-wrap: wrap;
-    gap:8px;
+    gap: 30px;
+    justify-content: center;
+    list-style: none;
+    padding: 0;
 }
