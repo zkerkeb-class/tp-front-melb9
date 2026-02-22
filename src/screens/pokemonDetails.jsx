@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
-import { useParams, Link, useNavigate } from "react-router";
+import { useParams, Link, useNavigate } from "react-router"; 
 import './pokemonDetails.css';
 
 const PokemonDetails = () => {
     const { id } = useParams();
-    const navigate = useNavigate(); // Nécessaire pour la redirection
+    const navigate = useNavigate();
     const [pokemon, setPokemon] = useState(null);
     const [isFavorite, setIsFavorite] = useState(false);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
 
     useEffect(() => {
         fetch(`http://localhost:3000/pokemons/${id}`)
@@ -29,20 +30,17 @@ const PokemonDetails = () => {
         }
         localStorage.setItem("pokeFavorites", JSON.stringify(favorites));
         window.dispatchEvent(new Event("storage"));
-        setIsFavorite(!isFavorite); // Mise à jour locale pour l'affichage immédiat
+        setIsFavorite(!isFavorite); 
     };
 
-    // Fonction de suppression
-    const handleDelete = async () => {
-        if (window.confirm(`⚠️ Es-tu sûr de vouloir supprimer ${pokemon.name.french} ?`)) {
-            try {
-                const res = await fetch(`http://localhost:3000/pokemons/${id}`, { method: 'DELETE' });
-                if (res.ok) {
-                    navigate('/'); // Retour à l'accueil après suppression
-                }
-            } catch (error) {
-                alert("Erreur lors de la suppression");
+    const executeDelete = async () => {
+        try {
+            const res = await fetch(`http://localhost:3000/pokemons/${id}`, { method: 'DELETE' });
+            if (res.ok) {
+                navigate('/'); 
             }
+        } catch (error) {
+            alert("Erreur lors de la suppression");
         }
     };
 
@@ -54,11 +52,10 @@ const PokemonDetails = () => {
         <div className="details-page-container">
             <Link to="/" className="back-link">← Retour au Pokédex</Link>
 
-            {/* On utilise une classe CSS pour gérer la couleur dynamique via une variable */}
             <div className={`details-card poke-type-${mainType}-border`}>
                 
                 <button onClick={toggleFavorite} className="details-fav-button">
-                    {isFavorite ? "⭐" : "☆"}
+                    {isFavorite ? "★" : "☆"}
                 </button>
 
                 <div className="details-image-container">
@@ -84,7 +81,6 @@ const PokemonDetails = () => {
                     ))}
                 </div>
 
-                {/* --- BOUTONS D'ACTION (Modifier / Supprimer) --- */}
                 <div className="action-buttons-container">
                     <button 
                         onClick={() => navigate(`/pokemonEdit/${id}`)} 
@@ -93,14 +89,49 @@ const PokemonDetails = () => {
                         Modifier
                     </button>
                     <button 
-                        onClick={handleDelete} 
+                        onClick={() => setShowDeleteModal(true)} 
                         className="btn-action btn-delete"
                     >
                         Supprimer
                     </button>
                 </div>
-
             </div>
+
+            {showDeleteModal && (
+                <div className="modal-overlay">
+                    <div className="modal-content delete-modal">
+                        <div className="warning-icon" style={{color: '#ff4757', marginBottom: '15px'}}>
+                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M3 6h18"></path>
+                                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+                                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+                            </svg>
+                        </div>
+                        
+                        <h3 className="modal-title">Relâcher le Pokémon ?</h3>
+                        <p style={{marginBottom: '20px'}}>Es-tu sûr de vouloir relâcher <strong>{pokemon.name.french}</strong> ?</p>
+                        
+                        <div className="modal-buttons-row" style={{display: 'flex', gap: '10px'}}>
+                            <button 
+                                className="cancel-button" 
+                                onClick={() => setShowDeleteModal(false)}
+                                style={{flex: 1, padding: '10px', borderRadius: '20px', border: '1px solid gray', background: 'transparent', color: 'white', cursor: 'pointer'}}
+                            >
+                                Annuler
+                            </button>
+                            
+                            <button 
+                                className="confirm-delete-button" 
+                                onClick={executeDelete}
+                                style={{flex: 1, padding: '10px', borderRadius: '20px', border: 'none', background: '#ff4757', color: 'white', cursor: 'pointer', fontWeight: 'bold'}}
+                            >
+                                Relâcher
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            
         </div>
     );
 };

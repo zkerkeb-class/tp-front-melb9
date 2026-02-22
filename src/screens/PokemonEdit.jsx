@@ -60,7 +60,7 @@ const PokemonEdit = () => {
                 body: JSON.stringify(pokemon)
             });
             if (response.ok) {
-                navigate(`/pokemonDetails/${id}`); // Retour aux détails après sauvegarde
+                navigate(`/pokemonDetails/${id}`); 
             }
         } catch (error) {
             console.error("Erreur update", error);
@@ -78,7 +78,6 @@ const PokemonEdit = () => {
 
                 <form onSubmit={handleSubmit} className="edit-form">
                     
-                    {/* SECTION 1 : INFOS GÉNÉRALES */}
                     <div className="form-section">
                         <label>Nom du Pokémon</label>
                         <input 
@@ -102,7 +101,6 @@ const PokemonEdit = () => {
                                 placeholder="https://..."
                             />
                         </div>
-                        {/* Prévisualisation de l'image */}
                         <div className="image-preview">
                             {pokemon.image && <img src={pokemon.image} alt="Preview" />}
                         </div>
@@ -123,7 +121,6 @@ const PokemonEdit = () => {
                         </select>
                     </div>
 
-                    {/* SECTION 2 : STATISTIQUES */}
                     <h3 className="section-subtitle">Statistiques de base</h3>
                     
                     <div className="stats-grid-edit">

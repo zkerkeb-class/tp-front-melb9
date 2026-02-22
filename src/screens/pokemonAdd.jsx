@@ -96,7 +96,7 @@ const PokemonAdd = () => {
                         ))}
                     </div>
 
-                    <button type="submit" className="create-button">✨ Créer le Pokémon</button>
+                    <button type="submit" className="create-button"> Créer le Pokémon</button>
                 </form>
             </div>
 
@@ -104,7 +104,7 @@ const PokemonAdd = () => {
             {showSuccessModal && (
                 <div className="modal-overlay">
                     <div className="modal-content success-modal">
-                        <div className="success-icon">🎉</div>
+    
                         <h3 className="modal-title">Succès !</h3>
                         <p><strong>{pokemon.name.french}</strong> a bien été ajouté au Pokédex.</p>
                         
